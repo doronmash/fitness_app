@@ -83,12 +83,13 @@
 
         <Button
             android:id="@+id/su_btn"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:text="Sign Up"
             android:textColorLink="#673AB7"
-            />
+            android:backgroundTint="@color/button_color"
+            android:layout_gravity="center_horizontal"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
