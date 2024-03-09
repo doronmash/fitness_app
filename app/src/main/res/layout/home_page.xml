@@ -51,6 +51,34 @@
         tools:ignore="MissingConstraints"
         tools:visibility="visible" />
 
+    <TextView
+        android:id="@+id/hm_tv_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="asd"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toStartOf="@+id/hm_sign_in"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/hm_sign_up"
+        tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/hm_tv_logout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:text="Logout"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/hm_sign_up"
+        app:layout_constraintTop_toBottomOf="@+id/HmTitel"
+        tools:ignore="MissingConstraints" />
+
     <FrameLayout
         android:id="@+id/hm_fragment"
         android:layout_width="406dp"
@@ -78,5 +106,6 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="44dp" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
