@@ -1,15 +1,27 @@
 package com.example.demo.models;
 
+import java.util.Date;
+
 public class User {
-    String name, email, password, age;
+    String userID, name, email, password, age;
+    int weight;
+//    Date dateOfBirth;
 
-    public User(String name, String email, String password, String age) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.age = age;
-    }
-
+//    public User(String userID, String name, String email, String password, int weight, Date dateOfBirth) {
+//        this.userID = userID;
+//        this.name = name;
+//        this.email = email;
+//        this.password = password;
+//        this.weight = weight;
+//        this.dateOfBirth = dateOfBirth;
+//    }
+public User(String userID, String name, String email, String password, int weight) {
+    this.userID = userID;
+    this.name = name;
+    this.email = email;
+    this.password = password;
+    this.weight = weight;
+}
     public String getName() {
         return name;
     }
