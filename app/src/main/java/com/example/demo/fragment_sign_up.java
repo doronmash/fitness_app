@@ -1,7 +1,5 @@
 package com.example.demo;
 
-import static android.content.ContentValues.TAG;
-
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -32,11 +30,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicMarkableReference;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import androidx.lifecycle.ViewModelProvider;
 
@@ -48,7 +41,7 @@ public class fragment_sign_up extends Fragment {
     Button btn_sign_up;
     FirebaseAuth mAuth;
     FirebaseDatabase database;
-    DatabaseReference reference;
+    DatabaseReference db_user_reference;
     private ActivityViewModel activityViewModel;
 
     private String email, name, password, password_repeat;
@@ -61,7 +54,7 @@ public class fragment_sign_up extends Fragment {
         btn_sign_up = view.findViewById(R.id.su_btn);
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
-        reference = database.getReference("users");
+        db_user_reference = database.getReference("users");
 
     }
 
@@ -102,11 +95,27 @@ public class fragment_sign_up extends Fragment {
                                         Toast.makeText(getContext(), "user created.",
                                                 Toast.LENGTH_SHORT).show();
                                         FirebaseUser user = mAuth.getCurrentUser();
+                                        HashMap<String, String> activityDataMap = new HashMap<>();
+                                        activityDataMap.put("userID", user.getUid());
+                                        activityDataMap.put("name", name);
+                                        activityDataMap.put("email", email);
+                                        activityDataMap.put("password", password);
 
-                                        HashMap<String, String> dataMap = new HashMap<>();
-                                        dataMap.put("name", name);
-                                        CustomData userData = new CustomData(dataMap);
+
+                                        CustomData userData = new CustomData(activityDataMap);
                                         activityViewModel.setCustomData(userData);
+
+                                        Bundle bundle = new Bundle();
+                                        bundle.putSerializable("userDict", activityDataMap);
+
+                                        Fragment fragment_user_info = new fragment_user_info();
+                                        fragment_user_info.setArguments(bundle);
+                                        getParentFragmentManager().beginTransaction()
+                                                .replace(R.id.hm_fragment, fragment_user_info)
+                                                .addToBackStack(null)  // Optional: Add to back stack for fragment navigation
+                                                .commit();
+
+                                        Log.w("Pttt", "asdasdasdasdasd", task.getException());
 
                                     } else {
                                         // If sign in fails, display a message to the user.
@@ -126,23 +135,13 @@ public class fragment_sign_up extends Fragment {
         return view;
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.w("Pttt", "asdasdasd");
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    //
 //    @Override
 //    public View onCreateView1(LayoutInflater inflater, ViewGroup container,
 //                             Bundle savedInstanceState) {
@@ -169,7 +168,7 @@ public class fragment_sign_up extends Fragment {
 //                    final User newUser = new User(name, email, password);
 //
 //                    // Check if the new user email is unique
-//                    reference.orderByChild("email").equalTo(newUser.getEmail())
+//                    db_user_reference.orderByChild("email").equalTo(newUser.getEmail())
 //                            .addListenerForSingleValueEvent(new ValueEventListener() {
 //                                @Override
 //                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -179,8 +178,8 @@ public class fragment_sign_up extends Fragment {
 //                                        Toast.makeText(getActivity(), "User email already exists.", Toast.LENGTH_SHORT).show();
 //                                    } else {
 //                                        // User email is unique, add the new user
-//                                        String newUserId = reference.push().getKey(); // Generate a unique key for the new user
-//                                        reference.child(newUserId).setValue(newUser);
+//                                        String newUserId = db_user_reference.push().getKey(); // Generate a unique key for the new user
+//                                        db_user_reference.child(newUserId).setValue(newUser);
 //
 //                                        Log.d("FirebaseExample", "New user added successfully.");
 //
