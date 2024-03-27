@@ -13,9 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import com.example.demo.custom_data.CustomData;
-import com.example.demo.models.User;
 import com.example.demo.view_models.ActivityViewModel;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -23,11 +21,8 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
@@ -55,7 +50,6 @@ public class fragment_sign_up extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
         db_user_reference = database.getReference("users");
-
     }
 
     private void check_edit_text_content() {
@@ -112,11 +106,8 @@ public class fragment_sign_up extends Fragment {
                                         fragment_user_info.setArguments(bundle);
                                         getParentFragmentManager().beginTransaction()
                                                 .replace(R.id.hm_fragment, fragment_user_info)
-                                                .addToBackStack(null)  // Optional: Add to back stack for fragment navigation
+                                                .addToBackStack(null)
                                                 .commit();
-
-                                        Log.w("Pttt", "asdasdasdasdasd", task.getException());
-
                                     } else {
                                         // If sign in fails, display a message to the user.
                                         Toast.makeText(getActivity(), "Failed to register: "+task.getException().getMessage()+"!", Toast.LENGTH_SHORT).show();
@@ -134,72 +125,4 @@ public class fragment_sign_up extends Fragment {
         });
         return view;
     }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.w("Pttt", "asdasdasd");
-    }
-
-    //
-//    @Override
-//    public View onCreateView1(LayoutInflater inflater, ViewGroup container,
-//                             Bundle savedInstanceState) {
-//        // Inflate the layout for this fragment
-//        View view = inflater.inflate(R.layout.fragment_sign_up, container, false);
-//        FirebaseApp.initializeApp(getContext());
-//
-//        init_attributes(view);
-//
-//        // Initialize Firebase only once (you don't need to initialize it again in onClick)
-//
-//        btn_sign_up.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                // Switch to the second fragment
-//
-//                name = String.valueOf(et_username.getText());
-//                email = String.valueOf(et_email.getText());
-//                password = String.valueOf(et_password.getText());
-//                password_repeat = String.valueOf(et_r_password.getText());
-//                check_edit_text_content();
-//
-//                if (password.equals(password_repeat)) {
-//                    final User newUser = new User(name, email, password);
-//
-//                    // Check if the new user email is unique
-//                    db_user_reference.orderByChild("email").equalTo(newUser.getEmail())
-//                            .addListenerForSingleValueEvent(new ValueEventListener() {
-//                                @Override
-//                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                                    if (dataSnapshot.exists()) {
-//                                        // User email already exists, handle the case (e.g., show an error message)
-//                                        Log.d("FirebaseExample", "User email already exists.");
-//                                        Toast.makeText(getActivity(), "User email already exists.", Toast.LENGTH_SHORT).show();
-//                                    } else {
-//                                        // User email is unique, add the new user
-//                                        String newUserId = db_user_reference.push().getKey(); // Generate a unique key for the new user
-//                                        db_user_reference.child(newUserId).setValue(newUser);
-//
-//                                        Log.d("FirebaseExample", "New user added successfully.");
-//
-//                                        // Add code to switch to the second fragment here if needed
-//                                    }
-//                                }
-//                                @Override
-//                                public void onCancelled(@NonNull DatabaseError databaseError) {
-//                                    Log.e("FirebaseExample", "Error checking for existing user email: " + databaseError.getMessage());
-//                                }
-//                            });
-//                } else {
-//                    Toast.makeText(getActivity(), "Passwords do not match. User creation failed.", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//        });
-//
-//        return view;
-//    }
-
-
-
 }

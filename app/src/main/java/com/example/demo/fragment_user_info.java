@@ -35,8 +35,7 @@ public class fragment_user_info extends Fragment {
     DatePicker datePicker;
     NumberPicker weightPicker;
     Button btn_next;
-    HashMap<String, String> dataMap;
-
+    HashMap<String, String> userDataDict;
     private ActivityViewModel activityViewModel;
     FirebaseDatabase database_new;
     DatabaseReference db_user_reference_new;
@@ -46,51 +45,50 @@ public class fragment_user_info extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
+    private User createNewUser() {
+        String userID = userDataDict.get("userID");
+        String name = userDataDict.get("name");
+        String email = userDataDict.get("email");
+        String password = userDataDict.get("password");
+        int weight = weightPicker.getValue();
+        int selectedDay = datePicker.getDayOfMonth();
+        int selectedMonth = datePicker.getMonth();
+        int selectedYear = datePicker.getYear();
+
+        // Create a Calendar instance and set the selected date
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(selectedYear, selectedMonth, selectedDay);
+
+        // Convert Calendar to Date object
+        Date dateOfBirth = calendar.getTime();
+
+        User newUser = new User(userID, name, email, password, weight, dateOfBirth);
+
+        return newUser;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_user_info, container, false);
+        activityViewModel = new ViewModelProvider(requireActivity()).get(ActivityViewModel.class);
+
+        userDataDict = activityViewModel.getCustomData().getValue().getData();
+
         datePicker = view.findViewById(R.id.ui_dp_datePicker);
         btn_next = view.findViewById(R.id.ui_btn_next);
         weightPicker = view.findViewById(R.id.ui_np_weight);
-        HashMap<String, String> userDataDict;
         database_new = FirebaseDatabase.getInstance();
         db_user_reference_new = database_new.getReference("users");
-
-        // Retrieve object from arguments Bundle
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            userDataDict = (HashMap<String, String>) bundle.getSerializable("userDict");
-        } else {
-            // Handle the case where bundle is null if needed
-            userDataDict = new HashMap<>(); // Initialize with empty HashMap
-        }
 
         btn_next.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FirebaseApp.initializeApp(getContext());
                 // Handle data changes in YourActivity
-                String userID = userDataDict.get("userID");
-                String name = userDataDict.get("name");
-                String email = userDataDict.get("email");
-                String password = userDataDict.get("password");
-                int weight = weightPicker.getValue();
-                int selectedDay = datePicker.getDayOfMonth();
-                int selectedMonth = datePicker.getMonth();
-                int selectedYear = datePicker.getYear();
 
-                // Create a Calendar instance and set the selected date
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(selectedYear, selectedMonth, selectedDay);
-
-                // Convert Calendar to Date object
-                Date dateOfBirth = calendar.getTime();
-
-                Log.d("temp", "Name: " + name);
-//                User newUser = new User(userID, name, email, password, weight, dateOfBirth);
-                User newUser = new User(userID, name, email, password, weight);
+                User newUser = createNewUser();
 
                 // Check if the new user email is unique
                 db_user_reference_new.orderByChild("email").equalTo(newUser.getEmail())
@@ -103,11 +101,8 @@ public class fragment_user_info extends Fragment {
                                     Toast.makeText(getActivity(), "User email already exists.", Toast.LENGTH_SHORT).show();
                                 } else {
                                     // User email is unique, add the new user
-                                    db_user_reference_new.child(userID).setValue(newUser);
-
+                                    db_user_reference_new.child(newUser.getUserID()).setValue(newUser);
                                     Log.d("FirebaseExample", "New user added successfully.");
-
-                                    // Add code to switch to the second fragment here if needed
                                 }
                             }
                             @Override
@@ -123,16 +118,8 @@ public class fragment_user_info extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        activityViewModel =  ViewModelProviders.of(getActivity()).get(ActivityViewModel.class);
-        activityViewModel = new ViewModelProvider(this).get(ActivityViewModel.class);
-
-        activityViewModel.getCustomData().observe(getViewLifecycleOwner(), customData -> {
-            dataMap = customData.getData();
-        });
         // Set the range for year picker (adjust as needed)
         weightPicker.setMinValue(25);
         weightPicker.setMaxValue(150);
-
-
     }
 }

@@ -18,12 +18,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.demo.models.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Firebase;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseException;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -41,19 +49,9 @@ public class fragment_sign_in extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    public fragment_sign_in() {
-        // Required empty public constructor
-    }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HomePageFragment.
-     */
-    // TODO: Rename and change types and number of parameters
+
+
     public static fragment_sign_in newInstance(String param1, String param2) {
         fragment_sign_in fragment = new fragment_sign_in();
         Bundle args = new Bundle();
@@ -84,16 +82,48 @@ public class fragment_sign_in extends Fragment {
         mAuth = FirebaseAuth.getInstance();
     }
 
-    private void check_edit_text_content() {
+    private boolean check_edit_text_content() {
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password) ) {
-            Toast.makeText(getContext(), "Empty Content Found", Toast.LENGTH_SHORT).show();
-            return;
+            Toast.makeText(getActivity(), "Empty Content Found", Toast.LENGTH_SHORT).show();
+
+            return false;
         }
+        return true;
     }
+
+
+    private void getUserByID(String userID) {
+        final FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ref = database.getReference(String.format("/users/%s", userID));
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    try {
+                        User user = dataSnapshot.getValue(User.class);
+                        Log.d(TAG, "User retrieved successfully: " + user.toString());
+                    } catch (DatabaseException e) {
+                        // Handle the exception
+                        e.printStackTrace();
+                    }
+
+                } else {
+                    Log.d(TAG, "User with ID " + userID + " does not exist.");
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e(TAG, "Error getting user data: " + databaseError.getMessage());
+            }
+        });
+    }
+
+
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_sign_in, container, false);
         init_attributes(view);
@@ -104,34 +134,44 @@ public class fragment_sign_in extends Fragment {
                 // Switch to the second fragment
                 email = String.valueOf(et_email.getText());
                 password = String.valueOf(et_password.getText());
-                check_edit_text_content();
+                if (check_edit_text_content()) {
+                    mAuth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isSuccessful()) {
+                                        // Sign in success, update UI with the signed-in user's information
+                                        Log.d(TAG, "signInWithEmail:success");
+                                        Toast.makeText(getActivity(), "Log in worked.",
+                                                Toast.LENGTH_SHORT).show();
 
-                mAuth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    // Sign in success, update UI with the signed-in user's information
-                                    Log.d(TAG, "signInWithEmail:success");
-                                    Toast.makeText(getActivity(), "Log in worked.",
-                                            Toast.LENGTH_SHORT).show();
-//                                    inflater.inflate(R.layout.fragment_first, container, false);
+                                        // Retrieve the user data after signing in
+                                        FirebaseUser currentUser = mAuth.getCurrentUser();
+                                        if (currentUser != null) {
+                                            String userID = currentUser.getUid();
+                                            getUserByID(userID);
+                                        }
+//                                        Log.d("newUser", user.toString());
 
-                                    Intent intent = new Intent(getActivity(), MainActivity.class);
-                                    startActivity(intent);
+
+                                        Intent intent = new Intent(getActivity(), MainActivity.class);
+                                        startActivity(intent);
 
 
 //                                    FirebaseUser user = mAuth.getCurrentUser();
 //                                    updateUI(user);
-                                } else {
-                                    // If sign in fails, display a message to the user.
-                                    Log.w(TAG, "signInWithEmail:failure", task.getException());
-                                    Toast.makeText(getActivity(), "Authentication failed.",
-                                            Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        // If sign in fails, display a message to the user.
+                                        Log.w(TAG, "signInWithEmail:failure", task.getException());
+                                        Toast.makeText(getActivity(), "Authentication failed.",
+                                                Toast.LENGTH_SHORT).show();
 //                                    updateUI(null);
+                                    }
                                 }
-                            }
-                        });
+                            });
+                }
+
+
 
 
             }
